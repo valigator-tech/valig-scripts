@@ -1,0 +1,11 @@
+# Environment variables
+.env
+
+# Claude AI
+.claude
+
+# Backup files
+*.bak
+*~
+*.swp
+*.swo
