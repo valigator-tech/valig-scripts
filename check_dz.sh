@@ -4,8 +4,8 @@ SERVICE="doublezerod"
 CRIT_PATTERN="bgp: peer closed"
 
 # Load environment variables from .env file
-if [ -f "$(dirname "$0")/.env" ]; then
-    source "$(dirname "$0")/.env"
+if [ -f ".env" ]; then
+    source ".env"
 else
     echo "ERROR: Missing .env file"
 fi
