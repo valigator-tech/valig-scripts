@@ -5,8 +5,8 @@ LOG_FILE="/var/log/solana/solana-validator.log"
 CRIT_PATTERN="panicked"
 
 # Load environment variables from .env file
-if [ -f "$(dirname "$0")/.env" ]; then
-    source "$(dirname "$0")/.env"
+if [ -f ".env" ]; then
+    source ".env"
 else
     echo "ERROR: Missing .env file"
 fi
