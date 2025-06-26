@@ -3,11 +3,15 @@ check_name="Check-DoubleZero-Health"
 SERVICE="doublezerod"
 CRIT_PATTERN="bgp: peer closed"
 
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Load environment variables from .env file
-if [ -f ".env" ]; then
-    source ".env"
+if [ -f "$SCRIPT_DIR/.env" ]; then
+    source "$SCRIPT_DIR/.env"
 else
-    echo "ERROR: Missing .env file"
+    echo "ERROR: Missing .env file at $SCRIPT_DIR/.env"
+    exit 1
 fi
 
 
