@@ -5,3 +5,6 @@ crontab
 */5 * * * * /root/git/valig-scripts/check_dz.sh >/dev/null 2>&1
 */5 * * * * ( sleep 15 ; /root/git/valig-scripts/check_sol.sh ) >/dev/null 2>&1
 */5 * * * * ( sleep 30 ; /root/git/valig-scripts/check_yellowstone.sh ) >/dev/null 2>&1
+
+0 */3 * * * /root/git/valig-scripts/pin.sh >/dev/null 2>&1
+0 * * * * /root/git/valig-scripts/snapshots.sh >/dev/null 2>&1
