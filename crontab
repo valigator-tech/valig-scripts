@@ -7,4 +7,4 @@ crontab
 */5 * * * * ( sleep 30 ; /root/git/valig-scripts/check_yellowstone.sh 2>&1 | logger -t check_yellowstone )
 
 0 */3 * * * /root/git/valig-scripts/pin.sh 2>&1 | logger -t pin
-0 * * * * /root/git/valig-scripts/snapshots.sh 2>&1 | logger -t snapshots
+0 * * * * /root/git/valig-scripts/snapshot_ufw_rules.sh 2>&1 | logger -t snapshots

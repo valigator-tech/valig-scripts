@@ -18,9 +18,9 @@ fi
 send_slack_alert() {
     local message="$1"
     if [ -n "$SLACK_WEBHOOK_URL" ]; then
-        curl -X POST -H 'Content-type: application/json' \
+        curl -s -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"$message\"}" \
-            "$SLACK_WEBHOOK_URL" 2>/dev/null
+            "$SLACK_WEBHOOK_URL" >/dev/null 2>&1
     fi
 }
 
