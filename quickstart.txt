@@ -1,0 +1,12 @@
+
+
+
+as root
+cd ~/
+mkdir git
+cd git
+git clone https://github.com/valigator-tech/valig-scripts
+cd valig-scripts
+
+touch .env
+
