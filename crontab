@@ -8,3 +8,4 @@ crontab
 
 0 */3 * * * /root/git/valig-scripts/pin.sh 2>&1 | logger -t pin
 0 * * * * /root/git/valig-scripts/snapshot_ufw_rules.sh 2>&1 | logger -t snapshots
+0 * * * * ( sleep 5 ; /root/git/valig-scripts/betterstack_ufw_rules.sh 2>&1 | logger -t betterstack_whitelist)
