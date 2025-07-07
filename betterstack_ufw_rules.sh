@@ -11,8 +11,8 @@ else
 fi
 
 # Fetch and parse IP addresses from the URL
-echo "Fetching IP addresses from $IP_LIST_URL..."
-IP_LIST=($(curl -s "$IP_LIST_URL" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'))
+echo "Fetching IP addresses from $BETTERSTACK_WHITELIST..."
+IP_LIST=($(curl -s "$BETTERSTACK_WHITELIST" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'))
 
 # Make sure UFW is enabled
 echo "Checking UFW status..."
