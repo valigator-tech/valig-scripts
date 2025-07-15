@@ -1,8 +1,7 @@
-crontab
-
-
+crontab examples
 
 */5 * * * * /root/git/valig-scripts/check_dz.sh 2>&1 | logger -t check_dz
+*/5 * * * * ( sleep 10 ; /root/git/valig-scripts/check_agave_watchtower.sh 2>&1 | logger -t betterstack_watchtower)
 */5 * * * * ( sleep 15 ; /root/git/valig-scripts/check_sol.sh 2>&1 | logger -t check_sol )
 */5 * * * * ( sleep 30 ; /root/git/valig-scripts/check_yellowstone.sh 2>&1 | logger -t check_yellowstone )
 
