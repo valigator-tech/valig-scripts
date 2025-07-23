@@ -17,6 +17,7 @@ VALIDATOR_IDENTITIES=(
     "vALigXFg9wnnhVHN16vNxHxXtAXiBv5QjAE6udoniBY"
     "2m1A2WM1vte7RWz5xTTw4i1SiXmngVtXhqFERaUjoAAb"
     "7tqeaFKsg2K9xKnQWe61w71AtCZVMQvG4hbFAiFAngYw"
+    "EDdcMPg3uJzzULys6uHtGFTALSzLumamETFpDMQ8KLyV"
 )
 
 # Function to send message to Slack
