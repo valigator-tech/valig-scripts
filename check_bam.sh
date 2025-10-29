@@ -4,7 +4,7 @@ IFS=$'\n\t'
 LC_ALL=C
 
 check_name="Check-BAM-Connection"
-LOG_FILE="/var/log/solana/solana.log"
+LOG_FILE="/var/log/solana/solana-validator.log"
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
