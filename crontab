@@ -1,9 +1,10 @@
 crontab examples
+*/5 * * * * ( sleep 10 ; /root/git/valig-scripts/check_agave_watchtower.sh 2>&1 | logger -t betterstack_watchtower)
 
 */5 * * * * /root/git/valig-scripts/check_dz.sh 2>&1 | logger -t check_dz
-*/5 * * * * ( sleep 10 ; /root/git/valig-scripts/check_agave_watchtower.sh 2>&1 | logger -t betterstack_watchtower)
-*/5 * * * * ( sleep 15 ; /root/git/valig-scripts/check_sol.sh 2>&1 | logger -t check_sol )
+*/5 * * * * ( sleep 20 ; /root/git/valig-scripts/check_sol.sh 2>&1 | logger -t check_sol )
 */5 * * * * ( sleep 30 ; /root/git/valig-scripts/check_yellowstone.sh 2>&1 | logger -t check_yellowstone )
+*/5 * * * * ( sleep 40 ; /root/git/valig-scripts/check_bam.sh 2>&1 | logger -t check_bam )
 
 0 */3 * * * /root/git/valig-scripts/pin.sh 2>&1 | logger -t pin
 0 * * * * /root/git/valig-scripts/snapshot_ufw_rules.sh 2>&1 | logger -t snapshots
