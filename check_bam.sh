@@ -34,7 +34,14 @@ if [ ! -f "$LOG_FILE" ]; then
 fi
 
 # Five minutes ago in UTC (to the second)
-FIVE_MIN_AGO="$(date -u -d '5 minutes ago' '+%Y-%m-%dT%H:%M:%S')"
+# Handle both GNU date (Linux) and BSD date (macOS)
+if date --version >/dev/null 2>&1; then
+    # GNU date
+    FIVE_MIN_AGO="$(date -u -d '5 minutes ago' '+%Y-%m-%dT%H:%M:%S')"
+else
+    # BSD date (macOS)
+    FIVE_MIN_AGO="$(date -u -v-5M '+%Y-%m-%dT%H:%M:%S')"
+fi
 
 # Scan recent lines once; normalize log timestamps to seconds before comparing.
 # The log lines look like:
