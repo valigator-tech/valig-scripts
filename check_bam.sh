@@ -43,12 +43,19 @@ else
     FIVE_MIN_AGO="$(date -u -v-5M '+%Y-%m-%dT%H:%M:%S')"
 fi
 
+# Debug output (set DEBUG=1 to enable)
+if [[ "${DEBUG:-0}" == "1" ]]; then
+    echo "DEBUG: FIVE_MIN_AGO=$FIVE_MIN_AGO"
+    echo "DEBUG: Current time=$(date -u '+%Y-%m-%dT%H:%M:%S')"
+    echo "DEBUG: Checking last 5 min for errors..."
+fi
+
 # Scan recent lines once; normalize log timestamps to seconds before comparing.
 # The log lines look like:
 # [2025-10-09T18:44:55.676610815Z INFO ...] Failed to connect to BAM
 read -r HAS_FAILED HAS_LOST < <(
   tail -n 1000000 -- "$LOG_FILE" \
-  | awk -F'[][]' -v c="$FIVE_MIN_AGO" '
+  | awk -F'[][]' -v c="$FIVE_MIN_AGO" -v debug="${DEBUG:-0}" '
       BEGIN { IGNORECASE=1; failed=0; lost=0 }
       {
         # $2 begins with the ISO8601 timestamp; drop everything after it (space -> severity)
@@ -59,11 +66,20 @@ read -r HAS_FAILED HAS_LOST < <(
 
         cutoff = c "Z"
         if (ts > cutoff) {
-          if (index($0, "Failed to connect to BAM") > 0)  failed=1
-          if (index($0, "BAM connection lost") > 0)        lost=1
+          if (index($0, "Failed to connect to BAM") > 0) {
+            failed=1
+            if (debug == "1") print "DEBUG: Found BAM failure at", ts > "/dev/stderr"
+          }
+          if (index($0, "BAM connection lost") > 0) {
+            lost=1
+            if (debug == "1") print "DEBUG: Found BAM lost at", ts > "/dev/stderr"
+          }
         }
       }
-      END { print failed, lost }
+      END {
+        if (debug == "1") print "DEBUG: Cutoff was", c "Z", "| Result:", failed, lost > "/dev/stderr"
+        print failed, lost
+      }
     '
 )
 
