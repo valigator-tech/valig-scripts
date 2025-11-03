@@ -50,7 +50,8 @@ read -r HAS_FAILED HAS_LOST < <(
         # Normalize to seconds so lexicographic compare works
         ts = substr(ts, 1, 19) "Z"        # 2025-10-09T18:44:55Z
 
-        if (ts > c "Z") {
+        cutoff = c "Z"
+        if (ts > cutoff) {
           if (index($0, "Failed to connect to BAM") > 0)  failed=1
           if (index($0, "BAM connection lost") > 0)        lost=1
         }
