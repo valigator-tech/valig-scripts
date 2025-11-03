@@ -53,7 +53,8 @@ fi
 # Scan recent lines once; normalize log timestamps to seconds before comparing.
 # The log lines look like:
 # [2025-10-09T18:44:55.676610815Z INFO ...] Failed to connect to BAM
-read -r HAS_FAILED HAS_LOST < <(
+# Temporarily use default IFS for read to split on space
+IFS=' ' read -r HAS_FAILED HAS_LOST < <(
   tail -n 1000000 -- "$LOG_FILE" \
   | awk -F'[][]' -v c="$FIVE_MIN_AGO" -v debug="${DEBUG:-0}" '
       BEGIN { IGNORECASE=1; failed=0; lost=0 }
