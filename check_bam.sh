@@ -83,6 +83,11 @@ read -r HAS_FAILED HAS_LOST < <(
     '
 )
 
+if [[ "${DEBUG:-0}" == "1" ]]; then
+    echo "DEBUG: HAS_FAILED='$HAS_FAILED'"
+    echo "DEBUG: HAS_LOST='$HAS_LOST'"
+fi
+
 if [[ "$HAS_FAILED" == "1" ]]; then
     message="$check_name - Failed to connect to BAM detected in logs!"
     echo "$message"
