@@ -54,10 +54,10 @@ fi
 # The log lines look like:
 # [2025-10-09T18:44:55.676610815Z INFO ...] Failed to connect to BAM
 # Temporarily use default IFS for read to split on space
-IFS=' ' read -r HAS_FAILED HAS_LOST < <(
+IFS=' ' read -r HAS_FAILED HAS_LOST NOT_ON_SCHEDULE < <(
   tail -n 1000000 -- "$LOG_FILE" \
   | awk -F'[][]' -v c="$FIVE_MIN_AGO" -v debug="${DEBUG:-0}" '
-      BEGIN { IGNORECASE=1; failed=0; lost=0 }
+      BEGIN { IGNORECASE=1; failed=0; lost=0; not_on_schedule=0 }
       {
         # $2 begins with the ISO8601 timestamp; drop everything after it (space -> severity)
         ts = $2
@@ -75,11 +75,15 @@ IFS=' ' read -r HAS_FAILED HAS_LOST < <(
             lost=1
             if (debug == "1") print "DEBUG: Found BAM lost at", ts > "/dev/stderr"
           }
+          if (index($0, "Validator is not on the leader schedule") > 0) {
+            not_on_schedule=1
+            if (debug == "1") print "DEBUG: Found not on leader schedule at", ts > "/dev/stderr"
+          }
         }
       }
       END {
-        if (debug == "1") print "DEBUG: Cutoff was", c "Z", "| Result:", failed, lost > "/dev/stderr"
-        print failed, lost
+        if (debug == "1") print "DEBUG: Cutoff was", c "Z", "| Result:", failed, lost, not_on_schedule > "/dev/stderr"
+        print failed, lost, not_on_schedule
       }
     '
 )
@@ -87,9 +91,16 @@ IFS=' ' read -r HAS_FAILED HAS_LOST < <(
 if [[ "${DEBUG:-0}" == "1" ]]; then
     echo "DEBUG: HAS_FAILED='$HAS_FAILED'"
     echo "DEBUG: HAS_LOST='$HAS_LOST'"
+    echo "DEBUG: NOT_ON_SCHEDULE='$NOT_ON_SCHEDULE'"
 fi
 
-if [[ "$HAS_FAILED" == "1" ]]; then
+# Only alert if there are BAM issues AND the validator IS on the leader schedule
+if [[ "$NOT_ON_SCHEDULE" == "1" ]]; then
+    if [[ "${DEBUG:-0}" == "1" ]]; then
+        echo "DEBUG: Suppressing alert - validator not on leader schedule"
+    fi
+    echo "$check_name - No BAM connection issues detected (not on leader schedule)"
+elif [[ "$HAS_FAILED" == "1" ]]; then
     message="$check_name - Failed to connect to BAM detected in logs!"
     echo "$message"
     send_slack_alert "$message @ $(hostname -s)"
