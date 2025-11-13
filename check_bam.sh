@@ -54,10 +54,10 @@ fi
 # The log lines look like:
 # [2025-10-09T18:44:55.676610815Z INFO ...] Failed to connect to BAM
 # Temporarily use default IFS for read to split on space
-IFS=' ' read -r HAS_FAILED HAS_LOST NOT_ON_SCHEDULE < <(
+IFS=' ' read -r HAS_FAILED HAS_LOST NOT_ON_SCHEDULE HAS_METRICS < <(
   tail -n 1000000 -- "$LOG_FILE" \
   | awk -F'[][]' -v c="$FIVE_MIN_AGO" -v debug="${DEBUG:-0}" '
-      BEGIN { IGNORECASE=1; failed=0; lost=0; not_on_schedule=0 }
+      BEGIN { IGNORECASE=1; failed=0; lost=0; not_on_schedule=0; has_metrics=0 }
       {
         # $2 begins with the ISO8601 timestamp; drop everything after it (space -> severity)
         ts = $2
@@ -79,11 +79,15 @@ IFS=' ' read -r HAS_FAILED HAS_LOST NOT_ON_SCHEDULE < <(
             not_on_schedule=1
             if (debug == "1") print "DEBUG: Found not on leader schedule at", ts > "/dev/stderr"
           }
+          if (index($0, "datapoint: bam_connection-metrics") > 0) {
+            has_metrics=1
+            if (debug == "1") print "DEBUG: Found bam_connection-metrics at", ts > "/dev/stderr"
+          }
         }
       }
       END {
-        if (debug == "1") print "DEBUG: Cutoff was", c "Z", "| Result:", failed, lost, not_on_schedule > "/dev/stderr"
-        print failed, lost, not_on_schedule
+        if (debug == "1") print "DEBUG: Cutoff was", c "Z", "| Result:", failed, lost, not_on_schedule, has_metrics > "/dev/stderr"
+        print failed, lost, not_on_schedule, has_metrics
       }
     '
 )
@@ -92,6 +96,7 @@ if [[ "${DEBUG:-0}" == "1" ]]; then
     echo "DEBUG: HAS_FAILED='$HAS_FAILED'"
     echo "DEBUG: HAS_LOST='$HAS_LOST'"
     echo "DEBUG: NOT_ON_SCHEDULE='$NOT_ON_SCHEDULE'"
+    echo "DEBUG: HAS_METRICS='$HAS_METRICS'"
 fi
 
 # Only alert if there are BAM issues AND the validator IS on the leader schedule
@@ -106,6 +111,10 @@ elif [[ "$HAS_FAILED" == "1" ]]; then
     send_slack_alert "$message @ $(hostname -s)"
 elif [[ "$HAS_LOST" == "1" ]]; then
     message="$check_name - BAM connection lost detected in logs!"
+    echo "$message"
+    send_slack_alert "$message @ $(hostname -s)"
+elif [[ "$HAS_METRICS" == "0" ]]; then
+    message="$check_name - No bam_connection-metrics datapoints found in last 5 minutes!"
     echo "$message"
     send_slack_alert "$message @ $(hostname -s)"
 else
