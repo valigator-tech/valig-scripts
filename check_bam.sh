@@ -54,10 +54,10 @@ fi
 # The log lines look like:
 # [2025-10-09T18:44:55.676610815Z INFO ...] Failed to connect to BAM
 # Temporarily use default IFS for read to split on space
-IFS=' ' read -r HAS_FAILED HAS_LOST NOT_ON_SCHEDULE HAS_METRICS < <(
+IFS=' ' read -r HAS_FAILED HAS_LOST NOT_ON_SCHEDULE HAS_METRICS BLOCK_ENGINE_DENIED < <(
   tail -n 1000000 -- "$LOG_FILE" \
   | awk -F'[][]' -v c="$FIVE_MIN_AGO" -v debug="${DEBUG:-0}" '
-      BEGIN { IGNORECASE=1; failed=0; lost=0; not_on_schedule=0; has_metrics=0 }
+      BEGIN { IGNORECASE=1; failed=0; lost=0; not_on_schedule=0; has_metrics=0; block_engine_denied=0 }
       {
         # $2 begins with the ISO8601 timestamp; drop everything after it (space -> severity)
         ts = $2
@@ -83,11 +83,15 @@ IFS=' ' read -r HAS_FAILED HAS_LOST NOT_ON_SCHEDULE HAS_METRICS < <(
             has_metrics=1
             if (debug == "1") print "DEBUG: Found bam_connection-metrics at", ts > "/dev/stderr"
           }
+          if (index($0, "block engine permission denied. not on leader schedule") > 0) {
+            block_engine_denied=1
+            if (debug == "1") print "DEBUG: Found block engine permission denied at", ts > "/dev/stderr"
+          }
         }
       }
       END {
-        if (debug == "1") print "DEBUG: Cutoff was", c "Z", "| Result:", failed, lost, not_on_schedule, has_metrics > "/dev/stderr"
-        print failed, lost, not_on_schedule, has_metrics
+        if (debug == "1") print "DEBUG: Cutoff was", c "Z", "| Result:", failed, lost, not_on_schedule, has_metrics, block_engine_denied > "/dev/stderr"
+        print failed, lost, not_on_schedule, has_metrics, block_engine_denied
       }
     '
 )
@@ -97,6 +101,7 @@ if [[ "${DEBUG:-0}" == "1" ]]; then
     echo "DEBUG: HAS_LOST='$HAS_LOST'"
     echo "DEBUG: NOT_ON_SCHEDULE='$NOT_ON_SCHEDULE'"
     echo "DEBUG: HAS_METRICS='$HAS_METRICS'"
+    echo "DEBUG: BLOCK_ENGINE_DENIED='$BLOCK_ENGINE_DENIED'"
 fi
 
 # Only alert if there are BAM issues AND the validator IS on the leader schedule
@@ -105,6 +110,11 @@ if [[ "$NOT_ON_SCHEDULE" == "1" ]]; then
         echo "DEBUG: Suppressing alert - validator not on leader schedule"
     fi
     echo "$check_name - No BAM connection issues detected (not on leader schedule)"
+elif [[ "$BLOCK_ENGINE_DENIED" == "1" ]]; then
+    if [[ "${DEBUG:-0}" == "1" ]]; then
+        echo "DEBUG: Suppressing alert - block engine permission denied (hot-spare)"
+    fi
+    echo "$check_name - No BAM connection issues detected (hot-spare mode)"
 elif [[ "$HAS_FAILED" == "1" ]]; then
     message="$check_name - Failed to connect to BAM detected in logs!"
     echo "$message"
