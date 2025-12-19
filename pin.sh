@@ -3,12 +3,21 @@
 # wait to load the binary
 # sleep 120
 
+# timeout after 1 hour (3600 seconds)
+MAX_WAIT=3600
+elapsed=0
+
 # main pid of solana-validator
 while [ -z "$solana_pid" ]; do
     solana_pid=$(pgrep -f "agave-validator --tip")
     if [ -z "$solana_pid" ]; then
         echo "set_affinity: solana_validator_404"
         sleep 20
+        elapsed=$((elapsed + 20))
+        if [ $elapsed -ge $MAX_WAIT ]; then
+            echo "set_affinity: timeout_after_${elapsed}s_waiting_for_validator"
+            exit 2
+        fi
     fi
 done
 
@@ -18,6 +27,11 @@ while [ -z "$thread_pid" ]; do
     if [ -z "$thread_pid" ]; then
         echo "set_affinity: solPohTickProd_404"
         sleep 120
+        elapsed=$((elapsed + 120))
+        if [ $elapsed -ge $MAX_WAIT ]; then
+            echo "set_affinity: timeout_after_${elapsed}s_waiting_for_thread"
+            exit 2
+        fi
     fi
 done
 
