@@ -16,9 +16,9 @@ IP_LIST=($(curl -s "$BETTERSTACK_WHITELIST" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\
 
 # Make sure UFW is enabled
 echo "Checking UFW status..."
-if ! sudo ufw status | grep -q "Status: active"; then
+if ! ufw status | grep -q "Status: active"; then
   echo "UFW is not active. Enabling UFW..."
-  sudo ufw enable
+  ufw enable
 fi
 
 # Add rules for each IP
@@ -35,12 +35,12 @@ for ip in "${IP_LIST[@]}"; do
   echo "Adding rules for IP: $ip"
 
   # TCP rule
-  sudo ufw insert 1 allow from $ip to any port 8899 proto tcp
+  ufw insert 1 allow from $ip to any port 8899 proto tcp
 
   # UDP rule
-  sudo ufw insert 1 allow from $ip to any port 8899 proto udp
+  ufw insert 1 allow from $ip to any port 8899 proto udp
 done
 
 echo "All UFW rules have been added!"
 echo "Current UFW status:"
-sudo ufw status
+ufw status

@@ -41,7 +41,7 @@ if [ "$current_affinity" == "2" ]; then
     exit 1
 else
     # set poh to cpu2
-    sudo taskset -cp 2 $thread_pid
+    taskset -cp 2 $thread_pid
     echo "set_affinity: set_done"
      # $thread_pid
 fi

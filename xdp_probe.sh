@@ -15,7 +15,7 @@ warn() { printf "\033[1;33m[WARN]\033[0m %s\n" "$*"; }
 err()  { printf "\033[1;31m[ERR ]\033[0m %s\n" "$*" >&2; }
 
 need_root() {
-  if [[ $EUID -ne 0 ]]; then err "Run as root (sudo)."; exit 1; fi
+  if [[ $EUID -ne 0 ]]; then err "Run as root."; exit 1; fi
 }
 
 has_cmd() { command -v "$1" >/dev/null 2>&1; }
